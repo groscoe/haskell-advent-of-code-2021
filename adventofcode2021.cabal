@@ -25,6 +25,7 @@ source-repository head
 library
   exposed-modules:
       Day1
+      Day2
       Utils
   other-modules:
       Paths_adventofcode2021

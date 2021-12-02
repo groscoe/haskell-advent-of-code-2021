@@ -1,7 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 module Day1 (sonarSweep1, sonarSweep2) where
 
-import Data.Foldable (foldl')
 import Utils (zipTailWith, window)
 
 --
