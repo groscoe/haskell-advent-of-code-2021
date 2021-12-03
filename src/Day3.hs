@@ -10,8 +10,8 @@ import Control.Arrow ((&&&))
 -- Part 1
 --
 
--- A trivial solution is enough here: we accumulate the frequencies of ones and
--- zeros, compute the desired rates according to each rules and multiply them
+-- A trivial algorithm is enough here: we accumulate the frequencies of ones and
+-- zeros, compute the desired rates according to each rule and multiply them
 
 type Rates = (Int, Int) -- gamma and epsilon rate, respectively
 
@@ -118,7 +118,10 @@ size Empty = 0
 size (Leaf x) = 1
 size (Branch s t1 t2) = s
 
--- | Search a binary tree for the bitstring that corresponds to the desired criteria
+-- | Search a binary tree for the bitstring that corresponds to the desired criteria.
+-- NOTE: The "frequency" of a given bit at a current position is given by the
+-- subtree sizes, since all bitstrings with '0' in a given position will be to
+-- the left of those with '1' in the position.
 getRating :: (Int -> Int -> Bool) -> BinTree String -> Maybe String
 getRating branchLeft tree = case tree of
     -- if there's only one number left, that's the desired rating.
