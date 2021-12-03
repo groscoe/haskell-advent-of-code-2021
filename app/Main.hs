@@ -6,6 +6,7 @@ import System.IO as S
 import Control.Exception (catch, IOException)
 import qualified Day1
 import qualified Day2
+import qualified Day3
 
 
 main :: IO ()
@@ -48,4 +49,5 @@ solve challengeNo = case challengeNo of
   2 -> Just . Day1.sonarSweep2
   3 -> Just . Day2.dive1
   4 -> Just . Day2.dive2
+  5 -> Just . Day3.binaryDiagnostic1
   _ -> const Nothing

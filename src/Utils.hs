@@ -1,6 +1,7 @@
 module Utils where
 
 import Text.ParserCombinators.ReadP (ReadP, readP_to_S)
+import Data.Bifunctor (bimap)
 
 -- | Zip a list with its own tail
 zipTail :: [a] -> [(a, a)]
@@ -24,3 +25,8 @@ runParser :: ReadP a -> String -> Maybe a
 runParser p input = case [x | (x, "") <- readP_to_S p input] of
     [result] -> Just result
     _ -> Nothing
+
+
+-- | Apply a function to both arguments of an homogeneous tuple
+both :: (a -> b) -> (a, a) -> (b, b)
+both f = bimap f f

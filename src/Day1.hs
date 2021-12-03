@@ -14,7 +14,7 @@ sonarSweep1 = show . countIncreases . fmap (read @Int) . lines
 
 -- | Count the number of times an element is greater than the previous element
 countIncreases :: [Int] -> Int
-countIncreases = length .  filter id .  zipTailWith (<)
+countIncreases = length . filter id . zipTailWith (<)
 
 sonarSweep1Example :: String
 sonarSweep1Example = unlines . fmap show $
