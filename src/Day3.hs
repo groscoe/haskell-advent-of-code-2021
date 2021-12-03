@@ -1,14 +1,17 @@
-module Day3 (binaryDiagnostic1) where
+module Day3 (binaryDiagnostic1, binaryDiagnostic2) where
 
 import Data.Foldable (Foldable (foldl'))
 import Utils (both, bin2dec)
-import Data.Char (digitToInt)
-
-import Debug.Trace (traceShow)
+import Data.Maybe (fromJust)
+import qualified Data.Char as C
+import Control.Arrow ((&&&))
 
 --
 -- Part 1
 --
+
+-- A trivial solution is enough here: we accumulate the frequencies of ones and
+-- zeros, compute the desired rates according to each rules and multiply them
 
 type Rates = (Int, Int) -- gamma and epsilon rate, respectively
 
@@ -75,115 +78,78 @@ binaryDiagnostic1Example =
       "01010"
     ]
 
-
 --
 -- Part 2
 --
 
--- The challenge becomes easier if we put the numbers into a "trie" of sorts, so
--- we don't need to "filter" the strings that don't conform to the criteria (for
--- bits, a binary tree sufices). The numbers are stored at the leaves. We start
--- at the root and proceed digit by digit. At each branch, if the next bit is
--- zero, we continue to the left subtree. If the next bit is one, we continue to
--- the right. When we reach the end of the string, we must've reached a leaf
--- containing our number.
+-- An easy way to solve this challenge is to read the bitstrings into a "binary
+-- trie", a simple binary tree with values on leaves where the position of a
+-- give bitstring is computed from its structure: for each bit, branch left if
+-- it's zero; else branch right. With this trie in hand, we can find each rating
+-- by branching according to its rule.
 
--- | A binary tree, with values stored in the leaves
+-- | A binary tree with items stored at the leaves. The number of leaves is
+-- stored at each branch as an optimization
 data BinTree a
   = Empty
   | Leaf a
-  | Branch (BinTree a) (BinTree a)
+  | Branch Int (BinTree a) (BinTree a)
   deriving Show
 
--- | A 'branching cursor', indicating to which subtree we should go next.
-data TreeCursor a
-  = TLeft a
-  | TRight a
-  | End
-  deriving (Eq, Show)
-
--- | Insert an item into a 'BinTree' according to a function that computes the
--- next 'TreeCursor'
-insert :: (a -> TreeCursor a) -> BinTree a -> a -> BinTree a
-insert advance tree item = go item item tree
+-- | Insert a bitstring at a leaf after traversing the tree according to its
+-- bits: if the current bit is '0', branch left; else, branch right.
+insert :: String -> BinTree String -> BinTree String
+insert item = go item item
   where
-    go item cursor tree = case (advance cursor, tree) of
-      -- If we've reached the end of the cursor and there are no branches, we
-      -- store the item
-      (End, Empty) -> Leaf cursor
-      (End, Leaf _) -> Leaf cursor
-      -- Else we branch according to the cursor, creating subtrees if needed.
-      (TLeft next, Empty) -> Branch (go item next Empty) Empty
-      (TRight next, Empty) -> Branch Empty (go item next Empty)
-      (TLeft next, Branch l r) -> Branch (go item next l) r
-      (TRight next, Branch l r) -> Branch l (go item next r)
-      -- Trying to branch when we've reached a 'Leaf' or reaching a branch at
-      -- the end of the cursor is an error and cannot happen if the input is
-      -- well-formed (if we tried to go on, we either wouldn't know where to
-      -- go, or we'd end up overwriting a leaf with a branch).
-      _ -> error "Couldn't insert item in tree"
+    go item "" Empty = Leaf item
+    go item ('0':bs) Empty = Branch 1 (go item bs Empty) Empty
+    go item ('1':bs) Empty = Branch 1 Empty (go item bs Empty)
+    go item ('0':bs) (Branch s l r) = Branch (s + 1) (go item bs l) r
+    go item ('1':bs) (Branch s l r) = Branch (s + 1) l (go item bs r)
+    go item _ _ = error "malformed input"
 
--- | Compute a branching cursor from a bit string
-classifyBit :: String -> TreeCursor String
-classifyBit "" = End
-classifyBit ('0':bs) = TLeft bs
-classifyBit ('1':bs) = TRight bs
-classifyBit s = error $ "Unrecognized bit: " <> s
-
--- | Store a list of bit strings into a trie
+-- | Build up a tree from a list of bitstrings
 makeTree :: [String] -> BinTree String
-makeTree = foldl' (insert classifyBit) Empty
+makeTree = foldl' (flip insert) Empty
 
--- | We make the BinTree foldable, so we can reuse 'bitFrequencies' to compute
--- the frequencies in a given sub-tree
-instance Foldable BinTree where
-  foldMap _ Empty = mempty
-  foldMap f (Leaf x) = f x
-  foldMap f (Branch l r) = foldMap f l <> foldMap f r
+-- | Get the size (number of leaves) of a binary tree
+size :: BinTree a -> Int
+size Empty = 0
+size (Leaf x) = 1
+size (Branch s t1 t2) = s
 
-
-getRating :: Int -- ^ Number of bits in a bitstring
-  -> (Int -> Int -> Either () ()) -- ^ A comparison function of the relative frequencies. Returns the direction of the next subtree.
-  -> BinTree String -- ^ A trie of bit-strings
-  -> String -- ^ A bit-string with the rating
-getRating numBits criteria = go 0
+-- | Search a binary tree for the bitstring that corresponds to the desired criteria
+getRating :: (Int -> Int -> Bool) -> BinTree String -> Maybe String
+getRating branchLeft tree = case tree of
+    -- if there's only one number left, that's the desired rating.
+    (Leaf item) -> Just item
+    t@(Branch s l r) ->
+      -- if there's only one number in the tree, that's the desired rating. Get it from wherever it is.
+      if s == 1 then dive t
+      else let zeros = size l
+               ones  = size r
+            in if zeros + ones == 1 then dive t
+               -- else discard the bitstrings that don't satisfy the criteria and go on to the next bit
+               else if branchLeft zeros ones then getRating branchLeft l
+               else getRating branchLeft r
+    -- fail on empty trees
+    _ -> Nothing
   where
-    -- | Search for the rating in the trie
-    go :: Int -> BinTree String -> String
-    -- if we only have one number left, stop
-    go _ (Leaf rating) = rating
-    -- Otherwise, discard numbers which do not match the bit criteria (i.e.
-    -- branch on the tree) and repeat the process, considering the next bit to
-    -- the right
-    go i t@(Branch l r) | i <= numBits =
-      let (zeros, ones) = bitFrequencies numBits t !! i -- TODO: optimize this, maybe storing the frequencies in the branches
-       in case criteria zeros ones of
-         Left _ -> try (i + 1) l t
-         Right _ -> try (i + 1) r t
+    -- | Get the first element of a tree, if any
+    dive Empty = Nothing
+    dive (Leaf x) = Just x
+    dive (Branch s l r) = case dive l of
+      Nothing -> dive r
+      Just x -> Just x
 
-    go _ t = traceShow t error "Reached the end of a branch without finding the rating"
-
-    try :: Int -> BinTree String -> BinTree String -> String
-    try i Empty t = dive t
-    try i t _ = go (i + 1) t
-
-    dive :: BinTree a -> a
-    dive = head . foldr (:) []
-
--- | To find oxygen generator rating, determine the most common value (0 or 1)
--- in the current bit position, and keep only numbers with that bit in that
--- position. If 0 and 1 are equally common, keep values with a 1 in the position
--- being considered.
-oxygenCriteria :: Int -> Int -> Either () ()
-oxygenCriteria zeros ones
-  | ones >= zeros = Right ()
-  | otherwise = Left ()
-
--- | To find CO2 scrubber rating, determine the least common value (0 or 1) in
--- the current bit position, and keep only numbers with that bit in that
--- position. If 0 and 1 are equally common, keep values with a 0 in the position
--- being considered.
-co2Criteria :: Int -> Int -> Either () ()
-co2Criteria zeros ones
-  | ones >= zeros = Left ()
-  | otherwise = Right ()
+-- | Use the binary numbers in your diagnostic report to calculate the oxygen
+-- generator rating and CO2 scrubber rating, then multiply them together.
+binaryDiagnostic2 :: String -> String
+binaryDiagnostic2 =
+    show . uncurry (*) .
+    (getOxygenGeneratorRating &&& getCO2ScrubberRating) .
+    makeTree . lines
+  where
+    getOxygenGeneratorRating = toDecimal . getRating (>) -- branch on the most common bit, or right if both are equally common
+    getCO2ScrubberRating = toDecimal . getRating (<=) -- branch on the least common bit, or left if both are equally common
+    toDecimal = toInteger . bin2dec . fmap C.digitToInt . fromJust -- convert a bitstring to its decimal representation

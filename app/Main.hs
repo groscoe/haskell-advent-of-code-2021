@@ -50,4 +50,5 @@ solve challengeNo = case challengeNo of
   3 -> Just . Day2.dive1
   4 -> Just . Day2.dive2
   5 -> Just . Day3.binaryDiagnostic1
+  6 -> Just . Day3.binaryDiagnostic2
   _ -> const Nothing
