@@ -7,6 +7,7 @@ import Control.Exception (catch, IOException)
 import qualified Day1
 import qualified Day2
 import qualified Day3
+import qualified Day4
 
 
 main :: IO ()
@@ -51,4 +52,5 @@ solve challengeNo = case challengeNo of
   4 -> Just . Day2.dive2
   5 -> Just . Day3.binaryDiagnostic1
   6 -> Just . Day3.binaryDiagnostic2
+  7 -> Just . Day4.giantSquid1
   _ -> const Nothing

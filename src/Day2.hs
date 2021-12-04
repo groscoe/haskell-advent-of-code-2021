@@ -17,7 +17,7 @@ import Text.ParserCombinators.ReadP
     string,
     (+++),
   )
-import Utils (runParser)
+import Utils (runParser, parseNumber)
 
 --
 -- Part 1
@@ -74,9 +74,7 @@ parseCommands = manyTill (parse <* optional (char '\n')) eof
     parseUp = string "up" $> Up
 
     parseLength :: ReadP Integer
-    parseLength = do
-        digits <- munch1 isDigit
-        pure $ read digits
+    parseLength = parseNumber
 
 -- | Get the final position after a series of commands
 calculatePosition1 :: [Command] -> Position
