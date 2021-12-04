@@ -1,13 +1,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TupleSections #-}
-module Day4 (giantSquid1) where
-import Data.List (transpose, find, mapAccumR)
-import Text.ParserCombinators.ReadP (ReadP, sepBy1, char)
-import Data.Functor (void)
-import Utils (parseNumber, runParser, splitOn)
-import Data.Maybe (listToMaybe)
-
-import Debug.Trace
+module Day4 (giantSquid1, giantSquid2) where
+import Data.List (transpose, find, partition)
+import Utils (splitOn)
 
 --
 -- part 1
@@ -36,9 +31,9 @@ drawUntilVictory ns bs = go (draw bs ns)
 draw :: [Board] -> [Int] -> [(Int, [Board])]
 draw bs [] = []
 draw bs (n:ns) = let marked = markNumber n <$> bs in (n, marked) : draw marked ns
-  where
-    markNumber :: Int -> Board -> Board
-    markNumber n = fmap (fmap (\m -> if fst m == n then (n, True) else m))
+
+markNumber :: Int -> Board -> Board
+markNumber n = fmap (fmap (\m -> if fst m == n then (n, True) else m))
 
 -- | A winning board has all the numbers in a row or a column marked
 hasWon :: Board -> Bool
@@ -95,3 +90,22 @@ giantSquidExample = unlines
     "22 11 13  6  5",
     "2  0 12  3  7"
   ]
+
+--
+-- Part 2
+--
+
+
+-- | Keep drawing until the last board wins
+drawUntilLast :: [Int] -> [Board] -> (Int, Board)
+drawUntilLast (n:ns) bs@(_:_) =
+  let marked = markNumber n <$> bs
+      (winners, losers) = partition hasWon marked
+   in case (winners, losers) of
+     ([b], []) -> (n, b)
+     _ -> drawUntilLast ns losers
+drawUntilLast _ _ = error "Out of numbers or out of borders"
+
+-- | Compute the score of the last winning board
+giantSquid2 :: String -> String
+giantSquid2 = show . uncurry boardScore . uncurry drawUntilLast . parseInput

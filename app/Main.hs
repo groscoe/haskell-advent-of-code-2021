@@ -1,7 +1,6 @@
 module Main where
 
 import Text.Read (readMaybe)
-import System.IO as S
 
 import Control.Exception (catch, IOException)
 import qualified Day1
@@ -33,12 +32,15 @@ solveChallenge n
 -- | Get the input for a challenge from a file in the 'input' folder
 getChallengeInput :: Int -> IO (Maybe String)
 getChallengeInput n = do
-  let inputPath = "./input/" <> show n <> ".txt"
+  let inputPath = "./input/day" <> show (getDay n) <> ".txt"
   (Just <$> readFile inputPath)
     `catch` \e -> do
       let err = show (e :: IOException)
       putStrLn $ "Error reading file: " <> err
       pure Nothing
+  where
+    -- get the day corresponding to the challenge, since the input files are the same
+    getDay challengeNo = let (d, r) = challengeNo `divMod` 2 in d + r
 
 
 -- | Solve a challenge for a given input
@@ -53,4 +55,5 @@ solve challengeNo = case challengeNo of
   5 -> Just . Day3.binaryDiagnostic1
   6 -> Just . Day3.binaryDiagnostic2
   7 -> Just . Day4.giantSquid1
+  8 -> Just . Day4.giantSquid2
   _ -> const Nothing
