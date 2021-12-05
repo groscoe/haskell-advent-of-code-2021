@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeApplications #-}
+
 module Day1 (sonarSweep1, sonarSweep2) where
 
-import Utils (zipTailWith, window)
+import Utils (window, zipTailWith)
 
 --
 -- Part 1

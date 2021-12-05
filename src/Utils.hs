@@ -3,7 +3,8 @@ module Utils where
 import Data.Bifunctor (bimap)
 import Data.Char (isDigit)
 import Data.Foldable (foldl')
-import Text.ParserCombinators.ReadP (ReadP, munch1, readP_to_S)
+import Text.ParserCombinators.ReadP (ReadP, munch1, readP_to_S, skipSpaces, char)
+import Data.Functor (void)
 
 -- | Zip a list with its own tail
 zipTail :: [a] -> [(a, a)]
@@ -29,8 +30,16 @@ runParser p input = case [x | (x, "") <- readP_to_S p input] of
 -- | parse a sequence of digits as a number
 parseNumber :: (Read a, Integral a) => ReadP a
 parseNumber = do
-  digits <- munch1 isDigit
+  digits <- token $ munch1 isDigit
   pure $ read digits
+
+-- | parses a newline character, followed by zero or more spaces. Currently accepts only '\n'
+newline :: ReadP ()
+newline = void . token $ char '\n'
+
+-- | Parse a symbol possibly followed by whitespace
+token :: ReadP a -> ReadP a
+token p = p <* skipSpaces
 
 -- | Apply a function to both arguments of an homogeneous tuple
 both :: (a -> b) -> (a, a) -> (b, b)

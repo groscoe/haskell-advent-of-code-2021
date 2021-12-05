@@ -16,8 +16,9 @@ import Text.ParserCombinators.ReadP
     skipSpaces,
     string,
     (+++),
+    many1
   )
-import Utils (runParser, parseNumber)
+import Utils (runParser, parseNumber, token, newline)
 
 --
 -- Part 1
@@ -53,25 +54,24 @@ diveWith interpreter =
 
 -- | Read a command from a string
 parseCommands :: ReadP [Command]
-parseCommands = manyTill (parse <* optional (char '\n')) eof
+parseCommands = many1 (parse <* optional newline)
   where
     parse :: ReadP Command
     parse = do
-        direction <- parseDirection
-        skipSpaces
-        direction <$> parseLength
+        directionConstructor <- parseDirection
+        directionConstructor <$> parseLength
 
     parseDirection :: ReadP (Integer -> Command)
     parseDirection = parseForward +++ parseDown +++ parseUp
 
     parseForward :: ReadP (Integer -> Command)
-    parseForward = string "forward" $> Forward
+    parseForward = token $ string "forward" $> Forward
 
     parseDown :: ReadP (Integer -> Command)
-    parseDown = string "down" $> Down
+    parseDown = token $ string "down" $> Down
 
     parseUp :: ReadP (Integer -> Command)
-    parseUp = string "up" $> Up
+    parseUp = token $ string "up" $> Up
 
     parseLength :: ReadP Integer
     parseLength = parseNumber

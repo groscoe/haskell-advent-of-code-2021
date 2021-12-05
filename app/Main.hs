@@ -1,13 +1,12 @@
 module Main where
 
-import Text.Read (readMaybe)
-
-import Control.Exception (catch, IOException)
+import Control.Exception (IOException, catch)
 import qualified Day1
 import qualified Day2
 import qualified Day3
 import qualified Day4
-
+import qualified Day5
+import Text.Read (readMaybe)
 
 main :: IO ()
 main = do
@@ -16,7 +15,6 @@ main = do
   case readMaybe challengeNo of
     Nothing -> putStrLn $ "Invalid challenge number: \"" <> challengeNo <> "\""
     Just n -> solveChallenge n
-
 
 -- | Output the solution of a challenge, if it exists and has already been solved.
 solveChallenge :: Int -> IO ()
@@ -27,7 +25,6 @@ solveChallenge n
     case input >>= solve n of
       Nothing -> putStrLn "Challenge not solved yet."
       Just answer -> putStrLn $ "--- Answer ---\n" <> answer
-
 
 -- | Get the input for a challenge from a file in the 'input' folder
 getChallengeInput :: Int -> IO (Maybe String)
@@ -42,11 +39,13 @@ getChallengeInput n = do
     -- get the day corresponding to the challenge, since the input files are the same
     getDay challengeNo = let (d, r) = challengeNo `divMod` 2 in d + r
 
-
 -- | Solve a challenge for a given input
-solve :: Int -- ^ Challenge number
-  -> String -- ^ Raw input for the challenge
-  -> Maybe String
+solve ::
+  -- | Challenge number
+  Int ->
+  -- | Raw input for the challenge
+  String ->
+  Maybe String
 solve challengeNo = case challengeNo of
   1 -> Just . Day1.sonarSweep1
   2 -> Just . Day1.sonarSweep2
@@ -56,4 +55,6 @@ solve challengeNo = case challengeNo of
   6 -> Just . Day3.binaryDiagnostic2
   7 -> Just . Day4.giantSquid1
   8 -> Just . Day4.giantSquid2
+  9 -> Just . Day5.hydrothermalVenture1
+  10 -> Just . Day5.hydrothermalVenture2
   _ -> const Nothing
