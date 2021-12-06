@@ -1,7 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Day6 where
+module Day6 (lanternfish1, lanternfish2) where
 
 import Control.Arrow (first)
 import Data.Foldable (Foldable (foldl'))
@@ -38,8 +38,17 @@ simulate = go
        in go (numDays - 1) newCounter
     go _ _ = error "day 0 not in head of the counter"
 
+-- | How many lanternfish would there be after 80 days?
 lanternfish1 :: String -> String
 lanternfish1 = show . sumCounter . simulate 80 . readInput
+
+--
+-- Part 2
+--
+
+-- | How many lanternfish would there be after 256 days?
+lanternfish2 :: String -> String
+lanternfish2 = show . sumCounter . simulate 256 . readInput
 
 -- utilities
 

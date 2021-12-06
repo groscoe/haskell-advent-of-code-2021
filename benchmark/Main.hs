@@ -11,6 +11,7 @@ import qualified Day3
 import qualified Day4
 import qualified Day5
 import System.Environment (getArgs)
+import qualified Day6
 
 readFileStrict :: FilePath -> IO String
 readFileStrict path = do
@@ -28,11 +29,13 @@ runChallenge 4 1 = Day4.giantSquid1
 runChallenge 4 2 = Day4.giantSquid2
 runChallenge 5 1 = Day5.hydrothermalVenture1
 runChallenge 5 2 = Day5.hydrothermalVenture2
+runChallenge 6 1 = Day6.lanternfish1
+runChallenge 6 2 = Day6.lanternfish2
 runChallenge _ _ = error "not solved yet"
 
 main :: IO ()
 main = do
-  let latestDaySolved = 5
+  let latestDaySolved = 6
   inputs <- traverse readFile ((\d -> "input/day" <> show d <> ".txt") <$> [1 .. latestDaySolved])
   let benchmarks = flip concatMap (zip [1 ..] inputs) $ \(day, input) ->
         [ bench ("day " <> show day <> ", part 1") $ nf (runChallenge day 1) input,

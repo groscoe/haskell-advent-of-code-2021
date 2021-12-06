@@ -59,4 +59,5 @@ solve challengeNo = case challengeNo of
   9 -> Just . Day5.hydrothermalVenture1
   10 -> Just . Day5.hydrothermalVenture2
   11 -> Just . Day6.lanternfish1
+  12 -> Just . Day6.lanternfish2
   _ -> const Nothing
