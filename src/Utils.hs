@@ -1,10 +1,14 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Utils where
 
-import Data.Bifunctor (bimap)
+import Data.Bifunctor (Bifunctor (first), bimap)
 import Data.Char (isDigit)
 import Data.Foldable (foldl')
-import Text.ParserCombinators.ReadP (ReadP, munch1, readP_to_S, skipSpaces, char)
 import Data.Functor (void)
+import Text.ParserCombinators.ReadP (ReadP, char, munch1, readP_to_S, skipSpaces)
+
+-- * List utilities
 
 -- | Zip a list with its own tail
 zipTail :: [a] -> [(a, a)]
@@ -20,6 +24,17 @@ window :: Int -> [a] -> [[a]]
 window windowSize xs
   | windowSize <= 1 = fmap (: []) xs
   | otherwise = zipWith (:) xs $ window (windowSize - 1) (tail xs)
+
+-- | Split a list on each occurrence of a separator
+splitOn :: Eq a => a -> [a] -> [[a]]
+splitOn sep = go []
+  where
+    go acc (c : cs)
+      | c == sep = reverse acc : go [] cs
+      | otherwise = go (c : acc) cs
+    go acc [] = [reverse acc]
+
+-- * Parsing
 
 -- | Try to parse a string until the end
 runParser :: ReadP a -> String -> Maybe a
@@ -41,6 +56,28 @@ newline = void . token $ char '\n'
 token :: ReadP a -> ReadP a
 token p = p <* skipSpaces
 
+-- * Frequency counters
+
+type Counter a =
+  -- | A simple frequency dictionary
+  [(a, Integer)]
+
+-- | Update the count in a given key by a function, inserting with a default
+-- value if necessary
+updateCounter :: Eq a => (Integer -> Integer) -> Integer -> a -> Counter a -> Counter a
+updateCounter f e k [] = [(k, e)]
+updateCounter f e k (item@(k', !v) : rest)
+  | k == k' = (k, f v) : rest
+  | otherwise = item : updateCounter f e k rest
+
+mapCounterKeys :: (a -> b) -> Counter a -> Counter b
+mapCounterKeys f = fmap (first f)
+
+sumCounter :: Counter a -> Integer
+sumCounter = sum . fmap snd
+
+-- * General utilities
+
 -- | Apply a function to both arguments of an homogeneous tuple
 both :: (a -> b) -> (a, a) -> (b, b)
 both f = bimap f f
@@ -48,11 +85,3 @@ both f = bimap f f
 -- | Convert a little-endian list of bits to an integer
 bin2dec :: [Int] -> Int
 bin2dec = foldl' (\n b -> b + 2 * n) 0 -- a.k.a <https://en.wikipedia.org/wiki/Horner%27s_method Horner's method>
-
-splitOn :: Eq a => a -> [a] -> [[a]]
-splitOn sep = go []
-  where
-    go acc (c : cs)
-      | c == sep = reverse acc : go [] cs
-      | otherwise = go (c:acc) cs
-    go acc [] = [reverse acc]
