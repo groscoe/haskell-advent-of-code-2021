@@ -30,6 +30,7 @@ library
       Day4
       Day5
       Day6
+      Day7
       Utils
   other-modules:
       Paths_adventofcode2021

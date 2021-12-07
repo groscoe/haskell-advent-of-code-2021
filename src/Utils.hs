@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE MultiWayIf #-}
 
 module Utils where
 
@@ -85,3 +86,11 @@ both f = bimap f f
 -- | Convert a little-endian list of bits to an integer
 bin2dec :: [Int] -> Int
 bin2dec = foldl' (\n b -> b + 2 * n) 0 -- a.k.a <https://en.wikipedia.org/wiki/Horner%27s_method Horner's method>
+
+-- | Compute minimum and maximum values of a (non-empty, finite) list
+bounds :: (Ord a) => [a] -> (a, a)
+bounds [] = error "Utils.bounds: empty list"
+bounds (x:xs) = foldl' minMax (x, x) xs
+  where
+    minMax :: Ord a => (a, a) -> a -> (a, a)
+    minMax (!mi, !ma) y = (min y mi, max y ma)
