@@ -9,6 +9,7 @@ import qualified Day5
 import Text.Read (readMaybe)
 import qualified Day6
 import qualified Day7
+import qualified Day8
 
 main :: IO ()
 main = do
@@ -63,4 +64,5 @@ solve challengeNo = case challengeNo of
   12 -> Just . Day6.lanternfish2
   13 -> Just . Day7.treacheryOfWhales1
   14 -> Just . Day7.treacheryOfWhales2
+  15 -> Just . Day8.sevenSegmentSearch1
   _ -> const Nothing
