@@ -65,4 +65,5 @@ solve challengeNo = case challengeNo of
   13 -> Just . Day7.treacheryOfWhales1
   14 -> Just . Day7.treacheryOfWhales2
   15 -> Just . Day8.sevenSegmentSearch1
+  16 -> Just . Day8.sevenSegmentSearch2
   _ -> const Nothing
