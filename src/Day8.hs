@@ -1,9 +1,8 @@
-{-# LANGUAGE FlexibleInstances #-}
 module Day8 (sevenSegmentSearch1, sevenSegmentSearch2) where
+
 import Utils (both)
 import Data.Bifunctor (second)
-import Data.Maybe (isJust, fromJust)
-import Data.Functor.Identity (Identity (..))
+import Data.Maybe (isJust, fromJust, fromMaybe, listToMaybe)
 import Data.List (permutations, sort)
 import Data.Foldable (foldl')
 
@@ -59,7 +58,7 @@ splitInput = both words . second tail . span (/= '|')
 -- Part 2
 --
 
-data IncompleteMap = SegmentMap {
+data IncompleteMap = IncompleteMap {
   a :: Maybe Char,
   b :: Maybe Char,
   c :: Maybe Char,
@@ -80,11 +79,11 @@ data CompleteMap = CompleteMap {
 } deriving Show
 
 emptyMap :: IncompleteMap
-emptyMap = SegmentMap Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+emptyMap = IncompleteMap Nothing Nothing Nothing Nothing Nothing Nothing Nothing
 
-isComplete :: IncompleteMap -> Maybe CompleteMap
-isComplete (SegmentMap (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g)) = Just $ CompleteMap a b c d e f g
-isComplete _ = Nothing
+toCompleteMap :: IncompleteMap -> Maybe CompleteMap
+toCompleteMap (IncompleteMap (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g)) = Just $ CompleteMap a b c d e f g
+toCompleteMap _ = Nothing
 
 getPossibilities :: String -> [IncompleteMap]
 getPossibilities one@[_, _] = flip fmap (permutations one) $
@@ -93,8 +92,7 @@ getPossibilities seven@[_, _, _] = flip fmap (permutations seven) $
   \[a, c, f] -> emptyMap {a = Just a, c = Just c, f = Just f}
 getPossibilities four@[_, _, _, _] = flip fmap (permutations four) $
   \[b, c, d, f] -> emptyMap {b = Just b, c = Just c, d = Just d, f = Just f}
-getPossibilities eight@[_, _, _, _, _, _, _] = flip fmap (permutations eight) $
-  \[a, b, c, d, e, f, g] -> SegmentMap (Just a) (Just b) (Just c) (Just d) (Just e) (Just f) (Just g)
+getPossibilities eight@[_, _, _, _, _, _, _] = [emptyMap]
 getPossibilities twoThreeOrFive@[_, _, _, _, _] = flip concatMap (permutations twoThreeOrFive) $
   \[u, v, x, y, z] -> [
     -- Either a '2'
@@ -116,31 +114,28 @@ getPossibilities zeroSixOrNine@[_, _, _, _, _, _] = flip concatMap (permutations
 getPossibilities err = error $ "Undecodable pattern: " <> err
 
 merge :: IncompleteMap -> IncompleteMap -> Maybe IncompleteMap
-merge mapA mapB = case traverse ((\f -> f mapA mapB) . mergeDigitOn) [a, b, c, d, e, f, g] of
-  Nothing -> Nothing
-  Just [a', b', c', d', e', f', g'] -> Just $ SegmentMap a' b' c' d' e' f' g'
-  _ -> error "impossible"
+merge mapA mapB = case traverse (\f -> mergeDigit (f mapA) (f mapB)) [a, b, c, d, e, f, g] of
+  Just [a', b', c', d', e', f', g'] -> Just $ IncompleteMap a' b' c' d' e' f' g'
+  _ -> Nothing
   where
-    mergeDigitOn f m1 m2 = mergeDigit (f m1) (f m2)
     mergeDigit (Just d1) (Just d2)
       | d1 == d2 = Just (Just d1)
       | otherwise = Nothing
     mergeDigit (Just d1) _ = Just (Just d1)
-    mergeDigit _ d2 = Just d2
+    mergeDigit _ (Just d2) = Just (Just d2)
+    mergeDigit _ Nothing = Just Nothing
 
 mergeMultiple :: [IncompleteMap] -> [IncompleteMap] -> [IncompleteMap]
 mergeMultiple m1s m2s = fromJust <$> filter isJust [merge m1 m2 | m1 <- m1s, m2 <- m2s]
 
 mapFromPatterns :: [String] -> Maybe CompleteMap
-mapFromPatterns patterns = case foldl1 mergeMultiple . fmap getPossibilities . filter ((/= Just 8) . uniqueDigit) $ patterns of
-  [finalMap] -> isComplete finalMap
-  _ -> Nothing
-
+mapFromPatterns patterns = do
+  segmentMap <- listToMaybe $ foldl1 mergeMultiple $ getPossibilities <$> patterns
+  toCompleteMap segmentMap
 
 digitFromMap :: CompleteMap -> String -> Int
-digitFromMap m@(CompleteMap a b c d e f g) str = case uniqueDigit str of
-  Just n -> n
-  Nothing -> case sort $ foldl' getSelector [] str of
+digitFromMap m@(CompleteMap a b c d e f g) str = flip fromMaybe (uniqueDigit str) $
+  case sort $ foldl' getSelector [] str of
     "abcefg" -> 0
     "acdeg" -> 2
     "acdfg" -> 3
