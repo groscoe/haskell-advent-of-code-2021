@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE MultiWayIf #-}
 
 module Utils where
 
@@ -34,6 +33,15 @@ splitOn sep = go []
       | c == sep = reverse acc : go [] cs
       | otherwise = go (c : acc) cs
     go acc [] = [reverse acc]
+
+type Zipper a = ([a], a, [a])
+
+toZipper :: [a] -> Zipper a
+toZipper (x:xs) = ([], x, xs)
+toZipper [] = error "Empty list cannot be converted to zipper"
+
+fromZipper :: Zipper a -> [a]
+fromZipper (xs, cursor, ys) = reverse (cursor : xs) <> ys
 
 -- * Parsing
 
