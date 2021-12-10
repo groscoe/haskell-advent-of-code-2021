@@ -34,14 +34,14 @@ splitOn sep = go []
       | otherwise = go (c : acc) cs
     go acc [] = [reverse acc]
 
-type Zipper a = ([a], a, [a])
-
-toZipper :: [a] -> Zipper a
-toZipper (x : xs) = ([], x, xs)
-toZipper [] = error "Empty list cannot be converted to zipper"
-
-fromZipper :: Zipper a -> [a]
-fromZipper (xs, cursor, ys) = reverse (cursor : xs) <> ys
+-- | Split a list in half in O(n) using the 'torsoise and hare' algorithm
+halve :: [a] -> ([a], [a])
+halve xs = go xs xs
+  where
+    go (x:xs) (_:_:ys) =
+      let (xs', ys') = go xs ys
+      in (x:xs', ys')
+    go xs ys = ([], xs)
 
 -- | Insert an element at the beginning and at the end of a list
 surroundWith :: a -> [a] -> [a]
@@ -54,6 +54,17 @@ indexMatrix = fmap addRow . zip [0 ..] . fmap (zip [0 ..])
   where
     addRow :: (Int, [(Int, a)]) -> [(Int, Int, a)]
     addRow (i, xs) = fmap (\(a, b) -> (i, a, b)) xs
+
+-- * Zipper utilities
+
+type Zipper a = ([a], a, [a])
+
+toZipper :: [a] -> Zipper a
+toZipper (x : xs) = ([], x, xs)
+toZipper [] = error "Empty list cannot be converted to zipper"
+
+fromZipper :: Zipper a -> [a]
+fromZipper (xs, cursor, ys) = reverse (cursor : xs) <> ys
 
 -- * Parsing
 

@@ -2,6 +2,7 @@ module Main where
 
 import Control.Exception (IOException, catch)
 import qualified Day1
+import qualified Day10
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -69,4 +70,6 @@ solve challengeNo = case challengeNo of
   16 -> Just . Day8.sevenSegmentSearch2
   17 -> Just . Day9.smokeBasin1
   18 -> Just . Day9.smokeBasin2
+  19 -> Just . Day10.syntaxScoring1
+  20 -> Just . Day10.syntaxScoring2
   _ -> const Nothing
