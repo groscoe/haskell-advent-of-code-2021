@@ -37,11 +37,23 @@ splitOn sep = go []
 type Zipper a = ([a], a, [a])
 
 toZipper :: [a] -> Zipper a
-toZipper (x:xs) = ([], x, xs)
+toZipper (x : xs) = ([], x, xs)
 toZipper [] = error "Empty list cannot be converted to zipper"
 
 fromZipper :: Zipper a -> [a]
 fromZipper (xs, cursor, ys) = reverse (cursor : xs) <> ys
+
+-- | Insert an element at the beginning and at the end of a list
+surroundWith :: a -> [a] -> [a]
+surroundWith x xs = x : xs <> [x]
+
+type Matrix a = [[a]]
+
+indexMatrix :: Matrix a -> Matrix (Int, Int, a)
+indexMatrix = fmap addRow . zip [0 ..] . fmap (zip [0 ..])
+  where
+    addRow :: (Int, [(Int, a)]) -> [(Int, Int, a)]
+    addRow (i, xs) = fmap (\(a, b) -> (i, a, b)) xs
 
 -- * Parsing
 
@@ -91,6 +103,10 @@ sumCounter = sum . fmap snd
 both :: (a -> b) -> (a, a) -> (b, b)
 both f = bimap f f
 
+-- | Get the 3rd element of tuple
+trd :: (a, b, c) -> c
+trd (_, _, c) = c
+
 -- | Convert a little-endian list of bits to an integer
 bin2dec :: [Int] -> Int
 bin2dec = foldl' (\n b -> b + 2 * n) 0 -- a.k.a <https://en.wikipedia.org/wiki/Horner%27s_method Horner's method>
@@ -98,7 +114,11 @@ bin2dec = foldl' (\n b -> b + 2 * n) 0 -- a.k.a <https://en.wikipedia.org/wiki/H
 -- | Compute minimum and maximum values of a (non-empty, finite) list
 bounds :: (Ord a) => [a] -> (a, a)
 bounds [] = error "Utils.bounds: empty list"
-bounds (x:xs) = foldl' minMax (x, x) xs
+bounds (x : xs) = foldl' minMax (x, x) xs
   where
     minMax :: Ord a => (a, a) -> a -> (a, a)
     minMax (!mi, !ma) y = (min y mi, max y ma)
+
+-- | Floating-point infinity
+inf :: Fractional a => a
+inf = 1 / 0

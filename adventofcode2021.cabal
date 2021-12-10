@@ -32,6 +32,9 @@ library
       Day6
       Day7
       Day8
+      Day9
+      Graph
+      State
       Utils
   other-modules:
       Paths_adventofcode2021
