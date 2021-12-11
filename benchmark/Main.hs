@@ -7,6 +7,7 @@ import Data.Functor ((<&>))
 import Data.Traversable (for)
 import qualified Day1
 import qualified Day10
+import qualified Day11
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -43,11 +44,13 @@ runChallenge 9 1 = Day9.smokeBasin1
 runChallenge 9 2 = Day9.smokeBasin2
 runChallenge 10 1 = Day10.syntaxScoring1
 runChallenge 10 2 = Day10.syntaxScoring2
+runChallenge 11 1 = Day11.dumboOctopus1
+runChallenge 11 2 = Day11.dumboOctopus2
 runChallenge _ _ = error "not solved yet"
 
 main :: IO ()
 main = do
-  let latestDaySolved = 10
+  let latestDaySolved = 11
   inputs <- traverse readFile ((\d -> "input/day" <> show d <> ".txt") <$> [1 .. latestDaySolved])
   let benchmarks = flip concatMap (zip [1 ..] inputs) $ \(day, input) ->
         [ bench ("day " <> show day <> ", part 1") $ nf (runChallenge day 1) input,

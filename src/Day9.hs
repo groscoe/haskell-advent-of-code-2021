@@ -2,7 +2,7 @@ module Day9 (smokeBasin1, smokeBasin2) where
 
 import Data.List (foldl', sortBy, transpose)
 import Graph (Graph, components, emptyGraph, insertVertex, buildGraph)
-import Utils (inf, surroundWith, window, trd, indexMatrix)
+import Utils (inf, surroundWith, window, trd, indexMatrix, Cell, toCells)
 
 --
 -- Smoke basin
@@ -13,8 +13,6 @@ import Utils (inf, surroundWith, window, trd, indexMatrix)
 -- minimum
 
 -- 3x3 matrix
-type Cell a = [[a]]
-
 -- | Find all of the low points on your heightmap. What is the sum of the risk
 -- levels of all low points on your heightmap?
 smokeBasin1 :: String -> String
@@ -87,9 +85,6 @@ splitInput numbers =
   let n = length (head numbers)
       boundary = replicate n inf
    in toCells $ surroundWith boundary numbers
-
-toCells :: [[a]] -> [[Cell a]]
-toCells = fmap (fmap transpose . window 3 . transpose) . window 3
 
 parseLines :: String -> [[Double]]
 parseLines = fmap (surroundWith inf . fmap (read . (: []))) . lines

@@ -7,6 +7,7 @@ import Data.Char (isDigit)
 import Data.Foldable (foldl')
 import Data.Functor (void)
 import Text.ParserCombinators.ReadP (ReadP, char, munch1, readP_to_S, skipSpaces)
+import Data.List (transpose)
 
 -- * List utilities
 
@@ -47,13 +48,54 @@ halve xs = go xs xs
 surroundWith :: a -> [a] -> [a]
 surroundWith x xs = x : xs <> [x]
 
+-- | Pad the sides of a matrix with a given value
+padWith :: a -> Matrix a -> Matrix a
+padWith x [] = []
+padWith x ys@(firstLine:_) =
+  let n = length firstLine + 2
+      boundaries = replicate n x
+   in surroundWith boundaries $ fmap (surroundWith x) ys
+
+--
+-- Matrices
+--
+
 type Matrix a = [[a]]
 
 indexMatrix :: Matrix a -> Matrix (Int, Int, a)
-indexMatrix = fmap addRow . zip [0 ..] . fmap (zip [0 ..])
+indexMatrix = indexMatrixWith id
+
+indexMatrixWith :: ((Int, Int, a) -> b) -> Matrix a -> Matrix b
+indexMatrixWith f = fmap indexCell . zip [0 ..] . fmap (zip [0 ..])
   where
-    addRow :: (Int, [(Int, a)]) -> [(Int, Int, a)]
-    addRow (i, xs) = fmap (\(a, b) -> (i, a, b)) xs
+    indexCell (row, xs) = fmap (\(col, value) -> f (row, col, value)) xs
+
+showMatrix :: Show a => [[a]] -> String
+showMatrix = unlines . fmap (unwords . fmap show)
+
+mapMatrix :: (a -> b) -> [[a]] -> [[b]]
+mapMatrix f = fmap (fmap f)
+
+--
+-- Cells (3x3 matrices for 2D automata)
+--
+
+type Cell a = [[a]]
+
+toCells :: Matrix a -> [[Cell a]]
+toCells = fmap (fmap transpose . window 3 . transpose) . window 3
+
+fromCells :: [[Cell a]] -> Matrix a
+fromCells = fmap (fmap getCursor)
+
+getCursor :: Cell a -> a
+getCursor xs = let [_, [_, x, _], _] = xs in x
+
+type Rule a = Cell a -> Cell a
+
+applyRule :: a -> Rule a -> Matrix a -> Matrix a
+applyRule padding r = fromCells . mapMatrix r . toCells . padWith padding
+
 
 -- * Zipper utilities
 
@@ -133,3 +175,9 @@ bounds (x : xs) = foldl' minMax (x, x) xs
 -- | Floating-point infinity
 inf :: Fractional a => a
 inf = 1 / 0
+
+-- | Iterate until no changes are detected
+untilEqual :: Eq a => (a -> a) -> a -> a
+untilEqual f x =
+  let x' = f x
+   in if x == x' then x else untilEqual f x'
