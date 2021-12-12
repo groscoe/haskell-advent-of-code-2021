@@ -1,4 +1,4 @@
-module Day11 where
+module Day11 (dumboOctopus1, dumboOctopus2) where
 
 import Utils (Matrix, untilEqual, mapMatrix, Rule, applyRule)
 import Data.Char (digitToInt)
