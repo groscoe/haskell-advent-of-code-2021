@@ -4,6 +4,8 @@ import Control.Exception (IOException, catch)
 import qualified Day1
 import qualified Day10
 import qualified Day11
+import qualified Day12
+import qualified Day13
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -13,7 +15,6 @@ import qualified Day7
 import qualified Day8
 import qualified Day9
 import Text.Read (readMaybe)
-import qualified Day12
 
 main :: IO ()
 main = do
@@ -78,4 +79,6 @@ solve challengeNo = case challengeNo of
   22 -> Just . Day11.dumboOctopus2
   23 -> Just . Day12.passagePathing1
   24 -> Just . Day12.passagePathing2
+  25 -> Just . Day13.transparentOriginal1
+  26 -> Just . Day13.transparentOriginal2
   _ -> const Nothing

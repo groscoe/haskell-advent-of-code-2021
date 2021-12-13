@@ -6,6 +6,7 @@ import qualified Day1
 import qualified Day10
 import qualified Day11
 import qualified Day12
+import qualified Day13
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -45,11 +46,13 @@ runChallenge 11 1 = Day11.dumboOctopus1
 runChallenge 11 2 = Day11.dumboOctopus2
 runChallenge 12 1 = Day12.passagePathing1
 runChallenge 12 2 = Day12.passagePathing2
+runChallenge 13 1 = Day13.transparentOriginal1
+runChallenge 13 2 = Day13.transparentOriginal2
 runChallenge _ _ = error "not solved yet"
 
 main :: IO ()
 main = do
-  let latestDaySolved = 12
+  let latestDaySolved = 13
   inputs <- traverse readFile ((\d -> "input/day" <> show d <> ".txt") <$> [1 .. latestDaySolved])
   let benchmarks = flip concatMap (zip [1 ..] inputs) $ \(day, input) ->
         [ bench ("day " <> show day <> ", part 1") $ nf (runChallenge day 1) input,
