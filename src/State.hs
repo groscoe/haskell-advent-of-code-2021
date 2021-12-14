@@ -29,6 +29,9 @@ get = State $ \s -> (s, s)
 put :: s -> State s ()
 put newState = State $ const ((), newState)
 
+modify :: (s -> s) -> State s ()
+modify f = get >>= put . f
+
 evalState :: State s a -> s -> a
 evalState s = fst . runState s
 

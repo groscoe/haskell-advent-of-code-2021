@@ -165,12 +165,18 @@ bin2dec :: [Int] -> Int
 bin2dec = foldl' (\n b -> b + 2 * n) 0 -- a.k.a <https://en.wikipedia.org/wiki/Horner%27s_method Horner's method>
 
 -- | Compute minimum and maximum values of a (non-empty, finite) list
-bounds :: (Ord a) => [a] -> (a, a)
-bounds [] = error "Utils.bounds: empty list"
-bounds (x : xs) = foldl' minMax (x, x) xs
+bounds :: Ord a => [a] -> (a, a)
+bounds = boundsBy id
+
+boundsBy :: Ord b => (a -> b) -> [a] -> (a, a)
+boundsBy _ [] = error "Utils.bounds: empty list"
+boundsBy f (x : xs) = foldl' (minMaxBy f) (x, x) xs
   where
-    minMax :: Ord a => (a, a) -> a -> (a, a)
-    minMax (!mi, !ma) y = (min y mi, max y ma)
+    minMaxBy :: Ord b => (a -> b) -> (a, a) -> a -> (a, a)
+    minMaxBy f (!mi, !ma) y = (minBy f y mi, maxBy f y ma)
+
+    minBy f x y = if f x < f y then x else y
+    maxBy f x y = if f y < f x then x else y
 
 -- | Floating-point infinity
 inf :: Fractional a => a
@@ -181,3 +187,7 @@ untilEqual :: Eq a => (a -> a) -> a -> a
 untilEqual f x =
   let x' = f x
    in if x == x' then x else untilEqual f x'
+
+iterateM' :: Monad m => Int -> (a -> m a) -> a -> m [a]
+iterateM' 0 _ x = pure [x]
+iterateM' i f x = f x >>= iterateM' (i-1) f
