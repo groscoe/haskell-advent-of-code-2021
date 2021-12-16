@@ -42,7 +42,7 @@ chiton2 s =
 
 shortestWithAStar :: Int -> Int -> Graph Int (Int, Int) -> (Int, Int) -> (Int, Int) -> Maybe (Int, [(Int, Int)])
 shortestWithAStar maxX maxY g start end =
-  aStar (ns `pruning` isWall) weight (dist end) (== end) start
+  aStar (neighbors `pruning` isWall) weight (dist end) (== end) start
   where
     dist (x1, y1) (x2, y2) = abs (y2 -y1) + abs (x2 -x1)
 
@@ -50,8 +50,8 @@ shortestWithAStar maxX maxY g start end =
 
     isWall (x, y) = x < 0 || x > maxX || y < 0 || y > maxY
 
-    ns :: (Int, Int) -> [(Int, Int)]
-    ns (x, y) = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+    neighbors :: (Int, Int) -> [(Int, Int)]
+    neighbors (x, y) = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
 
 --
 -- Utils
