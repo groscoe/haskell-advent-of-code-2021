@@ -30,6 +30,7 @@ library
       Day12
       Day13
       Day14
+      Day15
       Day2
       Day3
       Day4
@@ -39,15 +40,19 @@ library
       Day8
       Day9
       Graph
+      PriorityQueue
       Stack
       State
       Utils
+      WeightedGraph
   other-modules:
       Paths_adventofcode2021
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , containers
+    , search-algorithms
   default-language: Haskell2010
 
 executable adventofcode2021-exe
@@ -60,6 +65,8 @@ executable adventofcode2021-exe
   build-depends:
       adventofcode2021
     , base >=4.7 && <5
+    , containers
+    , search-algorithms
   default-language: Haskell2010
 
 test-suite adventofcode2021-test
@@ -73,6 +80,8 @@ test-suite adventofcode2021-test
   build-depends:
       adventofcode2021
     , base >=4.7 && <5
+    , containers
+    , search-algorithms
   default-language: Haskell2010
 
 benchmark adventofcode2021-bench
@@ -86,5 +95,7 @@ benchmark adventofcode2021-bench
   build-depends:
       adventofcode2021
     , base >=4.7 && <5
+    , containers
     , criterion
+    , search-algorithms
   default-language: Haskell2010

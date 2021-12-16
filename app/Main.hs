@@ -7,6 +7,7 @@ import qualified Day11
 import qualified Day12
 import qualified Day13
 import qualified Day14
+import qualified Day15
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -84,4 +85,6 @@ solve challengeNo = case challengeNo of
   26 -> Just . Day13.transparentOriginal2
   27 -> Just . Day14.extendedPolymerization1
   28 -> Just . Day14.extendedPolymerization2
+  29 -> Just . Day15.chiton1
+  30 -> Just . Day15.chiton2
   _ -> const Nothing

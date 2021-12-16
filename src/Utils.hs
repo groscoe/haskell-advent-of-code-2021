@@ -48,14 +48,6 @@ halve xs = go xs xs
 surroundWith :: a -> [a] -> [a]
 surroundWith x xs = x : xs <> [x]
 
--- | Pad the sides of a matrix with a given value
-padWith :: a -> Matrix a -> Matrix a
-padWith x [] = []
-padWith x ys@(firstLine:_) =
-  let n = length firstLine + 2
-      boundaries = replicate n x
-   in surroundWith boundaries $ fmap (surroundWith x) ys
-
 --
 -- Matrices
 --
@@ -75,6 +67,24 @@ showMatrix = unlines . fmap (unwords . fmap show)
 
 mapMatrix :: (a -> b) -> [[a]] -> [[b]]
 mapMatrix f = fmap (fmap f)
+
+-- | Pad the sides of a matrix with a given value
+padWith :: a -> Matrix a -> Matrix a
+padWith x [] = []
+padWith x ys@(firstLine:_) =
+  let n = length firstLine + 2
+      boundaries = replicate n x
+   in surroundWith boundaries $ fmap (surroundWith x) ys
+
+-- | Concatenate two matrices side-by-side
+beside :: [[a]] -> [[a]] -> [[a]]
+beside (xs : xss) (ys : yss) = xs <> ys : beside xss yss
+beside [] yss = yss
+beside xss [] = xss
+
+-- | Concatenate two matrices one above the other
+below :: [[a]] -> [[a]] -> [[a]]
+below xss yss = xss <> yss
 
 --
 -- Cells (3x3 matrices for 2D automata)
@@ -191,3 +201,12 @@ untilEqual f x =
 iterateM' :: Monad m => Int -> (a -> m a) -> a -> m [a]
 iterateM' 0 _ x = pure [x]
 iterateM' i f x = f x >>= iterateM' (i-1) f
+
+fst3 :: (a, b, c) -> a
+fst3 (x, _, _) = x
+
+snd3 :: (a, b, c) -> b
+snd3 (_, y, _) = y
+
+trd3 :: (a, b, c) -> c
+trd3 (_, _, z) = z
