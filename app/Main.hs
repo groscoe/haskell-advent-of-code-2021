@@ -10,6 +10,7 @@ import qualified Day14
 import qualified Day15
 import qualified Day16
 import qualified Day17
+import qualified Day18
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -93,4 +94,6 @@ solve challengeNo = case challengeNo of
   32 -> Just . Day16.packetDecoder2
   33 -> Just . Day17.trickShot1
   34 -> Just . Day17.trickShot2
+  35 -> Just . Day18.snailfish1
+  36 -> Just . Day18.snailfish2
   _ -> const Nothing
