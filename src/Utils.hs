@@ -2,12 +2,12 @@
 
 module Utils where
 
-import Data.Bifunctor (Bifunctor (first), bimap)
+import Data.Bifunctor (first, bimap)
 import Data.Char (isDigit)
 import Data.Foldable (foldl')
-import Data.Functor (void)
-import Text.ParserCombinators.ReadP (ReadP, char, munch1, readP_to_S, skipSpaces)
+import Data.Functor (void, ($>))
 import Data.List (transpose)
+import Text.ParserCombinators.ReadP (ReadP, char, get, look, munch1, readP_to_S, skipSpaces)
 
 -- * List utilities
 
@@ -39,9 +39,9 @@ splitOn sep = go []
 halve :: [a] -> ([a], [a])
 halve xs = go xs xs
   where
-    go (x:xs) (_:_:ys) =
+    go (x : xs) (_ : _ : ys) =
       let (xs', ys') = go xs ys
-      in (x:xs', ys')
+       in (x : xs', ys')
     go xs ys = ([], xs)
 
 -- | Insert an element at the beginning and at the end of a list
@@ -71,7 +71,7 @@ mapMatrix f = fmap (fmap f)
 -- | Pad the sides of a matrix with a given value
 padWith :: a -> Matrix a -> Matrix a
 padWith x [] = []
-padWith x ys@(firstLine:_) =
+padWith x ys@(firstLine : _) =
   let n = length firstLine + 2
       boundaries = replicate n x
    in surroundWith boundaries $ fmap (surroundWith x) ys
@@ -106,7 +106,6 @@ type Rule a = Cell a -> Cell a
 applyRule :: a -> Rule a -> Matrix a -> Matrix a
 applyRule padding r = fromCells . mapMatrix r . toCells . padWith padding
 
-
 -- * Zipper utilities
 
 type Zipper a = ([a], a, [a])
@@ -129,8 +128,12 @@ runParser p input = case [x | (x, "") <- readP_to_S p input] of
 -- | parse a sequence of digits as a number
 parseNumber :: (Read a, Integral a) => ReadP a
 parseNumber = do
+  firstDigit <- head <$> look
+  sign <- case firstDigit of
+    '-' -> get $> negate
+    _ -> pure id
   digits <- token $ munch1 isDigit
-  pure $ read digits
+  pure . sign $ read digits
 
 -- | parses a newline character, followed by zero or more spaces. Currently accepts only '\n'
 newline :: ReadP ()
@@ -200,7 +203,7 @@ untilEqual f x =
 
 iterateM' :: Monad m => Int -> (a -> m a) -> a -> m [a]
 iterateM' 0 _ x = pure [x]
-iterateM' i f x = f x >>= iterateM' (i-1) f
+iterateM' i f x = f x >>= iterateM' (i -1) f
 
 fst3 :: (a, b, c) -> a
 fst3 (x, _, _) = x

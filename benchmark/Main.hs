@@ -10,6 +10,7 @@ import qualified Day13
 import qualified Day14
 import qualified Day15
 import qualified Day16
+import qualified Day17
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -57,6 +58,8 @@ runChallenge 15 1 = Day15.chiton1
 runChallenge 15 2 = Day15.chiton2
 runChallenge 16 1 =  Day16.packetDecoder1
 runChallenge 16 2 =  Day16.packetDecoder2
+runChallenge 17 1 =  Day17.trickShot1
+runChallenge 17 2 =  Day17.trickShot2
 runChallenge _ _ = error "not solved yet"
 
 main :: IO ()
