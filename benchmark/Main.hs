@@ -12,8 +12,9 @@ import qualified Day15
 import qualified Day16
 import qualified Day17
 import qualified Day18
-import qualified Day20
 import qualified Day2
+import qualified Day20
+import qualified Day21
 import qualified Day3
 import qualified Day4
 import qualified Day5
@@ -64,11 +65,10 @@ runChallenge 17 1 =  Day17.trickShot1
 runChallenge 17 2 =  Day17.trickShot2
 runChallenge 18 1 =  Day18.snailfish1
 runChallenge 18 2 =  Day18.snailfish2
-runChallenge 19 1 =  const "not solved yet"
-runChallenge 19 2 =  const "not solved yet"
 runChallenge 20 1 = Day20.trenchMap1
 runChallenge 20 2 = Day20.trenchMap2
-runChallenge _ _ = error "not solved yet"
+runChallenge 21 1 = Day21.diracDice1
+runChallenge _ _ = const "not solved yet"
 
 main :: IO ()
 main = do

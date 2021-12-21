@@ -11,8 +11,9 @@ import qualified Day15
 import qualified Day16
 import qualified Day17
 import qualified Day18
-import qualified Day20
 import qualified Day2
+import qualified Day20
+import qualified Day21
 import qualified Day3
 import qualified Day4
 import qualified Day5
@@ -101,4 +102,5 @@ solve challengeNo = case challengeNo of
   38 -> const Nothing
   39 -> Just . Day20.trenchMap1
   40 -> Just . Day20.trenchMap2
+  41 -> Just . Day21.diracDice1
   _ -> const Nothing
