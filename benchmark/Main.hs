@@ -12,6 +12,7 @@ import qualified Day15
 import qualified Day16
 import qualified Day17
 import qualified Day18
+import qualified Day20
 import qualified Day2
 import qualified Day3
 import qualified Day4
@@ -61,13 +62,17 @@ runChallenge 16 1 =  Day16.packetDecoder1
 runChallenge 16 2 =  Day16.packetDecoder2
 runChallenge 17 1 =  Day17.trickShot1
 runChallenge 17 2 =  Day17.trickShot2
-runChallenge 18 1 =  Day17.snailfish1
-runChallenge 18 2 =  Day17.snailfish2
+runChallenge 18 1 =  Day18.snailfish1
+runChallenge 18 2 =  Day18.snailfish2
+runChallenge 19 1 =  const "not solved yet"
+runChallenge 19 2 =  const "not solved yet"
+runChallenge 20 1 = Day20.trenchMap1
+runChallenge 20 2 = Day20.trenchMap2
 runChallenge _ _ = error "not solved yet"
 
 main :: IO ()
 main = do
-  let latestDaySolved = 14
+  let latestDaySolved = 20
   inputs <- traverse readFile ((\d -> "input/day" <> show d <> ".txt") <$> [1 .. latestDaySolved])
   let benchmarks = flip concatMap (zip [1 ..] inputs) $ \(day, input) ->
         [ bench ("day " <> show day <> ", part 1") $ nf (runChallenge day 1) input,

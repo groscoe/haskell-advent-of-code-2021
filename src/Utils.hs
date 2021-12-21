@@ -7,7 +7,8 @@ import Data.Char (isDigit)
 import Data.Foldable (foldl')
 import Data.Functor (void, ($>))
 import Data.List (transpose)
-import Text.ParserCombinators.ReadP (ReadP, char, get, look, munch1, readP_to_S, skipSpaces)
+import Text.ParserCombinators.ReadP (ReadP, char, get, look, munch1, readP_to_S, skipSpaces, pfail)
+import Data.Maybe (listToMaybe)
 
 -- * List utilities
 
@@ -101,6 +102,11 @@ fromCells = fmap (fmap getCursor)
 getCursor :: Cell a -> a
 getCursor xs = let [_, [_, x, _], _] = xs in x
 
+setCursor :: a -> Cell a -> Cell a
+setCursor newCursor xs =
+  let [above, [before, _, after], below] = xs
+   in [above, [before, newCursor, after], below]
+
 type Rule a = Cell a -> Cell a
 
 applyRule :: a -> Rule a -> Matrix a -> Matrix a
@@ -128,11 +134,13 @@ runParser p input = case [x | (x, "") <- readP_to_S p input] of
 -- | parse a sequence of digits as a number
 parseNumber :: (Read a, Integral a) => ReadP a
 parseNumber = do
-  firstDigit <- head <$> look
+  firstDigit <- listToMaybe <$> look
   sign <- case firstDigit of
-    '-' -> get $> negate
-    _ -> pure id
+    Just '-' -> get $> negate
+    Just _ -> pure id
+    Nothing -> pfail -- empty string
   digits <- token $ munch1 isDigit
+  skipSpaces
   pure . sign $ read digits
 
 -- | parses a newline character, followed by zero or more spaces. Currently accepts only '\n'
